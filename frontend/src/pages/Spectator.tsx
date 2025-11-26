@@ -51,20 +51,15 @@ const Spectator: React.FC = () => {
         const newDirection = getAIDirection(currentSnake, food, direction);
         setDirection(newDirection);
 
-        const result = moveSnake(
-          currentSnake,
-          newDirection,
-          selectedGame.gameMode === 'portal',
-          food
-        );
+        const result = moveSnake(currentSnake, newDirection, food);
 
-        if (result.gameOver) {
-          // Reset the game
+        if (result.lostLife) {
+          // Reset position on self-collision (AI loses a "life")
           const initialSnake = [{ x: 10, y: 10 }];
+          setSnake(initialSnake);
           setFood(generateFood(initialSnake));
-          setScore(0);
           setDirection('RIGHT');
-          return initialSnake;
+          return currentSnake;
         }
 
         if (result.newFood) {
