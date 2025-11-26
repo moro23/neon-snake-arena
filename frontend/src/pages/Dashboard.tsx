@@ -2,8 +2,8 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Zap, Shield } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Zap, Heart, Sparkles } from 'lucide-react';
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -13,62 +13,43 @@ const Dashboard: React.FC = () => {
       <div className="max-w-4xl mx-auto space-y-8">
         <div className="text-center space-y-4">
           <h1 className="text-5xl font-bold neon-text text-neon-green animate-pulse">
-            SELECT YOUR MODE
+            SNAKE ARENA
           </h1>
           <p className="text-muted-foreground text-lg">
-            Choose your challenge and dominate the leaderboard
+            Portal walls, lives system, and progressive stages
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
-          {/* Classic Mode */}
-          <Card className="border-neon-red hover:border-neon-red/50 transition-all cursor-pointer group neon-border">
+        <div className="max-w-2xl mx-auto">
+          {/* Single Play Card */}
+          <Card className="group hover:border-neon-gold transition-all duration-300 cursor-pointer neon-border border-2"
+            onClick={() => navigate('/game')}>
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <Shield className="w-12 h-12 text-neon-red" />
-                <span className="text-4xl">🏛️</span>
-              </div>
-              <CardTitle className="text-2xl text-neon-red">Classic Mode</CardTitle>
-              <CardDescription>Traditional snake gameplay</CardDescription>
+              <CardTitle className="flex items-center gap-3 text-3xl">
+                <span className="text-5xl">🐍</span>
+                Start Game
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>✓ Hit the wall = Game Over</li>
-                <li>✓ Test your precision</li>
-                <li>✓ Master the classic challenge</li>
-              </ul>
-              <Button
-                onClick={() => navigate('/game/classic')}
-                className="w-full bg-neon-red/20 border-2 border-neon-red text-neon-red hover:bg-neon-red hover:text-background transition-all"
-                size="lg"
-              >
-                Play Classic
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Portal Mode */}
-          <Card className="border-neon-blue hover:border-neon-blue/50 transition-all cursor-pointer group neon-border">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <Zap className="w-12 h-12 text-neon-blue" />
-                <span className="text-4xl">🌀</span>
+              <p className="text-muted-foreground text-lg">
+                Portal mode with lives system. Pass through walls, avoid yourself, and progress through stages with increasing difficulty.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+                <div className="flex items-center gap-2">
+                  <Heart className="h-4 w-4 text-neon-red" />
+                  <span className="text-foreground">3 Lives</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Zap className="h-4 w-4 text-neon-gold" />
+                  <span className="text-foreground">Stage Progression</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-neon-green" />
+                  <span className="text-foreground">Portal Walls</span>
+                </div>
               </div>
-              <CardTitle className="text-2xl text-neon-blue">Portal Mode</CardTitle>
-              <CardDescription>Pass through walls</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>✓ Walls teleport you to opposite side</li>
-                <li>✓ Infinite playground</li>
-                <li>✓ Pure survival challenge</li>
-              </ul>
-              <Button
-                onClick={() => navigate('/game/portal')}
-                className="w-full bg-neon-blue/20 border-2 border-neon-blue text-neon-blue hover:bg-neon-blue hover:text-background transition-all"
-                size="lg"
-              >
-                Play Portal
+              <Button className="w-full bg-neon-gold hover:bg-neon-gold/90 text-background font-bold text-lg py-6" size="lg">
+                Play Now
               </Button>
             </CardContent>
           </Card>
@@ -82,7 +63,9 @@ const Dashboard: React.FC = () => {
             <p>🎮 <strong>Desktop:</strong> Use arrow keys to control your snake</p>
             <p>📱 <strong>Mobile:</strong> Tap the directional buttons</p>
             <p>🎯 Eat the red food to grow and score points</p>
-            <p>⚠️ Don't crash into yourself!</p>
+            <p>❤️ You have 3 lives - hitting yourself costs 1 life and resets position</p>
+            <p>⭐ Progress through stages - every 5 apples increases speed</p>
+            <p>🌀 Walls are portals - going through wraps you to the opposite side</p>
             <p>⏸️ Press Space to pause (desktop only)</p>
           </CardContent>
         </Card>

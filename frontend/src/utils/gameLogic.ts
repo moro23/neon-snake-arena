@@ -12,8 +12,15 @@ export interface GameState {
   food: Position;
   direction: Direction;
   score: number;
+  lives: number;
+  stage: number;
   isGameOver: boolean;
 }
+
+export const INITIAL_LIVES = 3;
+export const APPLES_PER_STAGE = 5;
+export const BASE_SPEED = 150;
+export const SPEED_DECREASE_PER_STAGE = 10; // Speed increases (interval decreases)
 
 export const GRID_SIZE = 20;
 export const CELL_SIZE = 20;
@@ -45,8 +52,7 @@ export const generateFood = (snake: Position[]): Position => {
 
 export const getNextHeadPosition = (
   head: Position,
-  direction: Direction,
-  isPortalMode: boolean
+  direction: Direction
 ): Position => {
   let newHead = { ...head };
 
@@ -65,25 +71,16 @@ export const getNextHeadPosition = (
       break;
   }
 
-  if (isPortalMode) {
-    // Wrap around
-    if (newHead.x < 0) newHead.x = GRID_SIZE - 1;
-    if (newHead.x >= GRID_SIZE) newHead.x = 0;
-    if (newHead.y < 0) newHead.y = GRID_SIZE - 1;
-    if (newHead.y >= GRID_SIZE) newHead.y = 0;
-  }
+  // Always wrap around (portal mode)
+  if (newHead.x < 0) newHead.x = GRID_SIZE - 1;
+  if (newHead.x >= GRID_SIZE) newHead.x = 0;
+  if (newHead.y < 0) newHead.y = GRID_SIZE - 1;
+  if (newHead.y >= GRID_SIZE) newHead.y = 0;
 
   return newHead;
 };
 
-export const checkWallCollision = (position: Position): boolean => {
-  return (
-    position.x < 0 ||
-    position.x >= GRID_SIZE ||
-    position.y < 0 ||
-    position.y >= GRID_SIZE
-  );
-};
+// Wall collision no longer used - always portal mode
 
 export const checkSelfCollision = (head: Position, snake: Position[]): boolean => {
   return snake.slice(1).some(segment => segment.x === head.x && segment.y === head.y);
@@ -96,20 +93,19 @@ export const checkFoodCollision = (head: Position, food: Position): boolean => {
 export const moveSnake = (
   snake: Position[],
   direction: Direction,
-  isPortalMode: boolean,
   food: Position
-): { newSnake: Position[]; newFood: Position | null; scoreIncrease: number; gameOver: boolean } => {
+): { 
+  newSnake: Position[]; 
+  newFood: Position | null; 
+  scoreIncrease: number; 
+  lostLife: boolean; 
+} => {
   const head = snake[0];
-  const newHead = getNextHeadPosition(head, direction, isPortalMode);
+  const newHead = getNextHeadPosition(head, direction);
 
-  // Check wall collision (only in classic mode)
-  if (!isPortalMode && checkWallCollision(newHead)) {
-    return { newSnake: snake, newFood: null, scoreIncrease: 0, gameOver: true };
-  }
-
-  // Check self collision
+  // Check self collision - now causes life loss instead of game over
   if (checkSelfCollision(newHead, snake)) {
-    return { newSnake: snake, newFood: null, scoreIncrease: 0, gameOver: true };
+    return { newSnake: snake, newFood: null, scoreIncrease: 0, lostLife: true };
   }
 
   // Check food collision
@@ -129,10 +125,24 @@ export const moveSnake = (
     newSnake = [newHead, ...snake.slice(0, -1)];
   }
 
-  return { newSnake, newFood, scoreIncrease, gameOver: false };
+  return { newSnake, newFood, scoreIncrease, lostLife: false };
 };
 
-// AI Bot logic for spectator mode
+export const calculateStage = (score: number): number => {
+  return Math.floor(score / (APPLES_PER_STAGE * 10)) + 1;
+};
+
+export const getPointsUntilNextStage = (score: number): number => {
+  const currentStage = calculateStage(score);
+  const nextStageScore = currentStage * APPLES_PER_STAGE * 10;
+  return nextStageScore - score;
+};
+
+export const calculateSpeed = (stage: number): number => {
+  return Math.max(50, BASE_SPEED - (stage - 1) * SPEED_DECREASE_PER_STAGE);
+};
+
+// AI Bot logic for spectator mode - updated for new rules
 export const getAIDirection = (snake: Position[], food: Position, currentDirection: Direction): Direction => {
   const head = snake[0];
   const dx = food.x - head.x;
@@ -155,11 +165,11 @@ export const getAIDirection = (snake: Position[], food: Position, currentDirecti
     if (dx < 0) possibleMoves.push('LEFT');
   }
 
-  // Filter out opposite direction and check for self-collision
+  // Filter out opposite direction and check for self-collision (walls wrap around)
   const validMoves = possibleMoves.filter(dir => {
     if (isOppositeDirection(currentDirection, dir)) return false;
     
-    const nextHead = getNextHeadPosition(head, dir, true); // Assume portal mode for AI
+    const nextHead = getNextHeadPosition(head, dir);
     return !checkSelfCollision(nextHead, snake);
   });
 
