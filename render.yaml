@@ -1,7 +1,7 @@
 services:
   # Backend Service (Docker)
   - type: web
-    name: snake-backend
+    name: neon-snake-api
     runtime: docker
     dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
@@ -16,7 +16,7 @@ services:
 
   # Frontend Service (Docker with Nginx)
   - type: web
-    name: snake-frontend
+    name: neon-snake-arena
     runtime: docker
     dockerfilePath: ./frontend/Dockerfile
     dockerContext: ./frontend
@@ -25,7 +25,7 @@ services:
       - key: VITE_API_URL
         fromService:
           type: web
-          name: snake-backend
+          name: neon-snake-api
           property: host
 
 databases:
