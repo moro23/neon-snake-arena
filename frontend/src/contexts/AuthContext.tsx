@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { mockApi } from '@/api/mockClient';
+import { api } from '@/api/client';
 
 interface User {
   id: string;
@@ -36,43 +36,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, password: string) => {
     try {
-      const result = await mockApi.login(email, password);
+      const result = await api.login(email, password);
       if (result.success && result.user) {
         setUser(result.user);
-        localStorage.setItem('snakeGameUser', JSON.stringify(result.user));
         return { success: true };
       }
       return { success: false, error: result.error };
     } catch (error) {
-      return { success: false, error: 'An error occurred during login' };
+      return { success: false, error: 'Login failed' };
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const signup = async (username: string, email: string, password: string) => {
+    setIsLoading(true);
     try {
-      const result = await mockApi.signup(username, email, password);
+      const result = await api.signup(username, email, password);
       if (result.success && result.user) {
         setUser(result.user);
-        localStorage.setItem('snakeGameUser', JSON.stringify(result.user));
         return { success: true };
       }
       return { success: false, error: result.error };
     } catch (error) {
-      return { success: false, error: 'An error occurred during signup' };
+      return { success: false, error: 'Signup failed' };
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('snakeGameUser');
+    localStorage.removeItem('token');
   };
 
   const updateHighScore = (score: number) => {
     if (user && score > user.highScore) {
       const updatedUser = { ...user, highScore: score };
       setUser(updatedUser);
-      localStorage.setItem('snakeGameUser', JSON.stringify(updatedUser));
-      mockApi.updateHighScore(user.id, score);
+      api.updateHighScore(user.id, score);
     }
   };
 

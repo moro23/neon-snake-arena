@@ -3,7 +3,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { GameBoard } from '@/components/game/GameBoard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { mockApi } from '@/api/mockClient';
+import { api } from '@/api/client';
 import { Position, Direction, generateFood, moveSnake, getAIDirection } from '@/utils/gameLogic';
 import { Loader2, Play, Pause } from 'lucide-react';
 
@@ -20,7 +20,7 @@ const Spectator: React.FC = () => {
   const [selectedGame, setSelectedGame] = useState<ActiveGame | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isWatching, setIsWatching] = useState(false);
-  
+
   // AI Bot state
   const [snake, setSnake] = useState<Position[]>([{ x: 10, y: 10 }]);
   const [food, setFood] = useState<Position>({ x: 15, y: 15 });
@@ -30,7 +30,7 @@ const Spectator: React.FC = () => {
   useEffect(() => {
     const fetchActiveGames = async () => {
       try {
-        const games = await mockApi.getActiveGames();
+        const games = await api.getActiveGames();
         setActiveGames(games);
       } catch (error) {
         console.error('Failed to fetch active games:', error);

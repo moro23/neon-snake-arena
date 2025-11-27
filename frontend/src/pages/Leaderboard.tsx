@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { mockApi } from '@/api/mockClient';
+import { api } from '@/api/client';
 import { Trophy, Medal, Award, Loader2 } from 'lucide-react';
 
 interface LeaderboardEntry {
@@ -19,7 +19,7 @@ const Leaderboard: React.FC = () => {
   useEffect(() => {
     const fetchLeaderboard = async () => {
       try {
-        const data = await mockApi.getLeaderboard();
+        const data = await api.getLeaderboard();
         setEntries(data);
       } catch (error) {
         console.error('Failed to fetch leaderboard:', error);
