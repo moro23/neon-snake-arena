@@ -1,24 +1,21 @@
 import React, { useEffect, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { GameBoard } from '@/components/game/GameBoard';
 import { Controls } from '@/components/game/Controls';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { useGameLoop } from '@/hooks/useGameLoop';
 import { useAuth } from '@/contexts/AuthContext';
 import { Direction, isOppositeDirection } from '@/utils/gameLogic';
 import { toast } from 'sonner';
-import { Play, Pause, RotateCcw, Home } from 'lucide-react';
+import { Play, Pause, RotateCcw, Home, Heart, Trophy } from 'lucide-react';
 
 const Game: React.FC = () => {
-  const { mode } = useParams<{ mode: 'classic' | 'portal' }>();
   const navigate = useNavigate();
   const { updateHighScore, user } = useAuth();
 
-  const gameMode = mode === 'portal' ? 'portal' : 'classic';
-
-  const handleGameOver = useCallback((finalScore: number) => {
+  const handleGameOver = useCallback((finalScore: number, finalStage: number) => {
     updateHighScore(finalScore);
     const isHighScore = user && finalScore > user.highScore;
     
@@ -27,7 +24,9 @@ const Game: React.FC = () => {
         ? `🎉 New High Score: ${finalScore}!` 
         : `Game Over! Score: ${finalScore}`,
       {
-        description: isHighScore ? 'Incredible performance!' : 'Try again to beat your record!',
+        description: isHighScore 
+          ? `Reached Stage ${finalStage}! Incredible performance!` 
+          : `Reached Stage ${finalStage}. Try again to beat your record!`,
         duration: 5000,
       }
     );
@@ -38,13 +37,16 @@ const Game: React.FC = () => {
     food,
     direction,
     score,
+    lives,
+    stage,
+    pointsUntilNextStage,
     isPlaying,
     isPaused,
     startGame,
     pauseGame,
     resetGame,
     changeDirection,
-  } = useGameLoop(gameMode, handleGameOver);
+  } = useGameLoop(handleGameOver);
 
   // Keyboard controls
   useEffect(() => {
@@ -78,32 +80,61 @@ const Game: React.FC = () => {
     <AppLayout>
       <div className="max-w-5xl mx-auto space-y-6">
         {/* Game Header */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <Card className="w-full sm:w-auto border-primary">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {/* Score */}
+          <Card className="border-primary">
             <CardContent className="p-4">
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
+                <Trophy className="h-8 w-8 text-neon-green" />
                 <div>
                   <div className="text-sm text-muted-foreground">Score</div>
-                  <div className="text-3xl font-bold neon-text text-neon-green">{score}</div>
+                  <div className="text-2xl font-bold neon-text text-neon-green">{score}</div>
                 </div>
                 {user && (
-                  <div className="border-l border-primary pl-4">
-                    <div className="text-sm text-muted-foreground">Best</div>
-                    <div className="text-2xl font-bold text-primary">{user.highScore}</div>
+                  <div className="border-l border-primary pl-3 ml-auto">
+                    <div className="text-xs text-muted-foreground">Best</div>
+                    <div className="text-lg font-bold text-primary">{user.highScore}</div>
                   </div>
                 )}
               </div>
             </CardContent>
           </Card>
 
-          <Card className="w-full sm:w-auto border-primary">
+          {/* Lives */}
+          <Card className="border-primary">
             <CardContent className="p-4">
-              <div className="flex items-center gap-2">
-                <span className="text-2xl">{gameMode === 'classic' ? '🏛️' : '🌀'}</span>
-                <div>
-                  <div className="text-sm text-muted-foreground">Mode</div>
-                  <div className="text-lg font-bold capitalize">{gameMode}</div>
+              <div className="flex items-center gap-3">
+                <div className="flex gap-1">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <Heart
+                      key={i}
+                      className={`h-6 w-6 ${
+                        i < lives
+                          ? 'fill-neon-red text-neon-red'
+                          : 'text-muted opacity-30'
+                      }`}
+                    />
+                  ))}
                 </div>
+                <div>
+                  <div className="text-sm text-muted-foreground">Lives</div>
+                  <div className="text-2xl font-bold text-neon-red">{lives}</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Stage */}
+          <Card className="border-neon-gold">
+            <CardContent className="p-4">
+              <div>
+                <div className="text-sm text-muted-foreground">Stage</div>
+                <div className="text-2xl font-bold neon-text text-neon-gold">Stage {stage}</div>
+                {isPlaying && (
+                  <div className="text-xs text-muted-foreground mt-1">
+                    Next in {pointsUntilNextStage} pts
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
