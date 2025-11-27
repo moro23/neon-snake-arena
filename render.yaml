@@ -1,0 +1,38 @@
+services:
+  # Backend Service (Docker)
+  - type: web
+    name: snake-backend
+    runtime: docker
+    root: backend
+    plan: free
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: snake-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: PORT
+        value: 8000
+
+  # Frontend Service (Static Site)
+  - type: static
+    name: snake-frontend
+    root: frontend
+    buildCommand: npm install && npm run build
+    publishDir: dist
+    plan: free
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: snake-backend
+          property: url
+
+databases:
+  - name: snake-db
+    plan: free
+    databaseName: snake_db
+    user: postgres
+
+version: "1"
